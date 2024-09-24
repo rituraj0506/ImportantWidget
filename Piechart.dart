@@ -1,5 +1,9 @@
 piedata.dart
   
+// dependencies       fl_chart: ^0.69.0 
+                      pie_chart: ^5.4.0
+
+                        
 import 'package:flutter/material.dart';
 
 class PieData {
@@ -25,6 +29,7 @@ class Data {
 admindashboard.dart
   
 class _AdmindashboardState extends State<Admindashboard> {
+  
   List<PieChartSectionData> getSections() => PieData.data
       .asMap()
       .map<int, PieChartSectionData>((index, data) {
