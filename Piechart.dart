@@ -29,6 +29,7 @@ class _AdmindashboardState extends State<Admindashboard> {
       .asMap()
       .map<int, PieChartSectionData>((index, data) {
         final value = PieChartSectionData(
+            radius: 10,// set radius according to use
           color: data.color,
           value: data.percent,
           title: '${data.percent}',
@@ -64,6 +65,8 @@ class _AdmindashboardState extends State<Admindashboard> {
                                                                       getSections(),
                                                                   centerSpaceRadius:
                                                                       52,
+                                                                  startDegreeOffset:
+                                                        90, // Rotate the chart to position the colors as needed
                                                                 ),
                                                               ),
                                                               Column(
