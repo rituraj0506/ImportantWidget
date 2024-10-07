@@ -1,0 +1,388 @@
+without scrollable property
+
+// import 'package:first_app/Pages.dart/ProfilePage.dart';
+// import 'package:first_app/Pages.dart/payroll.dart';
+// import 'package:first_app/Pages.dart/staffattendance.dart';
+// import 'package:first_app/Pages.dart/staffdashboard.dart';
+// import 'package:first_app/Pages.dart/staffleavepage.dart';
+// import 'package:flutter/material.dart';
+
+// class HomePage extends StatefulWidget {
+//   const HomePage({super.key});
+
+//   @override
+//   State<HomePage> createState() => _HomePageState();
+// }
+
+// class _HomePageState extends State<HomePage> {
+//   int currentTab = 0; // Set home (dashboard) as the default tab
+//   final List<Widget> Screen = [
+//     Staffdashboard(),
+//     Staffattendance(),
+//     Staffleavepage(),
+//     Payroll(),
+//     Profilepage(),
+//   ];
+
+//   final PageStorageBucket bucket = PageStorageBucket();
+//   Widget currentScreen = Staffdashboard(); // Default to the dashboard
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: PageStorage(bucket: bucket, child: currentScreen),
+//       floatingActionButton: FloatingActionButton(
+//         onPressed: () {
+//           setState(() {
+//             currentScreen = Staffdashboard(); // Navigate to the dashboard
+//             currentTab = 0; // Set home tab as active
+//           });
+//         },
+//         child: Icon(
+//           Icons.home,
+//           color: currentTab == 0
+//               ? Color(0xFF007DBB)
+//               : Colors.grey, // Use #007DBB for the home icon
+//         ),
+//       ),
+//       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+//       bottomNavigationBar: BottomAppBar(
+//         shape: CircularNotchedRectangle(),
+//         notchMargin: 10,
+//         child: Container(
+//           height: 66,
+//           child: Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Row(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   MaterialButton(
+//                     minWidth: 40,
+//                     onPressed: () {
+//                       setState(() {
+//                         currentScreen = Staffleavepage();
+//                         currentTab = 1; // Leave tab
+//                       });
+//                     },
+//                     child: Column(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         Icon(Icons.event_note,
+//                             color: currentTab == 1
+//                                 ? Colors.blue
+//                                 : Colors.grey), // Default to grey for leave
+//                         Text(
+//                           "Leave",
+//                           style: TextStyle(
+//                               color:
+//                                   currentTab == 1 ? Colors.blue : Colors.grey),
+//                         )
+//                       ],
+//                     ),
+//                   ),
+//                   MaterialButton(
+//                     minWidth: 40,
+//                     onPressed: () {
+//                       setState(() {
+//                         currentScreen = Staffattendance();
+//                         currentTab = 2; // Attendance tab
+//                       });
+//                     },
+//                     child: Column(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         Icon(Icons.fact_check,
+//                             color: currentTab == 2 ? Colors.blue : Colors.grey),
+//                         Text(
+//                           "Attendance",
+//                           style: TextStyle(
+//                               color:
+//                                   currentTab == 2 ? Colors.blue : Colors.grey),
+//                         )
+//                       ],
+//                     ),
+//                   )
+//                 ],
+//               ),
+//               Row(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   MaterialButton(
+//                     minWidth: 40,
+//                     onPressed: () {
+//                       setState(() {
+//                         currentScreen = Payroll();
+//                         currentTab = 3; // Payroll tab
+//                       });
+//                     },
+//                     child: Column(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         Icon(Icons.account_balance_wallet,
+//                             color: currentTab == 3 ? Colors.blue : Colors.grey),
+//                         Text(
+//                           "Payroll",
+//                           style: TextStyle(
+//                               color:
+//                                   currentTab == 3 ? Colors.blue : Colors.grey),
+//                         )
+//                       ],
+//                     ),
+//                   ),
+//                   MaterialButton(
+//                     minWidth: 40,
+//                     onPressed: () {
+//                       setState(() {
+//                         currentScreen = Profilepage();
+//                         currentTab = 4; // Profile tab
+//                       });
+//                     },
+//                     child: Column(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         Icon(Icons.person,
+//                             color: currentTab == 4 ? Colors.blue : Colors.grey),
+//                         Text(
+//                           "Profile",
+//                           style: TextStyle(
+//                               color:
+//                                   currentTab == 4 ? Colors.blue : Colors.grey),
+//                         )
+//                       ],
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+with scrollable property 
+
+
+
+import 'package:first_app/Pages.dart/ProfilePage.dart';
+import 'package:first_app/Pages.dart/payroll.dart';
+import 'package:first_app/Pages.dart/staffattendance.dart';
+import 'package:first_app/Pages.dart/staffdashboard.dart';
+import 'package:first_app/Pages.dart/staffleavepage.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int currentTab = 0;
+  final List<Widget> Screen = [
+    Staffdashboard(),
+    Staffattendance(),
+    Staffleavepage(),
+    Payroll(),
+    Profilepage(),
+  ];
+
+  final PageStorageBucket bucket = PageStorageBucket();
+  Widget currentScreen = Staffdashboard();
+  bool _isBottomNavVisible = true; // Initially visible
+  late ScrollController _scrollController; // Scroll controller to detect scroll
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+        setState(() {
+          _isBottomNavVisible = false; // Hide bottom nav when scrolling down
+        });
+      } else if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.forward) {
+        setState(() {
+          _isBottomNavVisible = true; // Show bottom nav when scrolling up
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageStorage(
+        bucket: bucket,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo) {
+            if (scrollInfo is ScrollUpdateNotification) {
+              if (scrollInfo.scrollDelta! > 0) {
+                // Scrolling down
+                setState(() {
+                  _isBottomNavVisible = false;
+                });
+              } else if (scrollInfo.scrollDelta! < 0) {
+                // Scrolling up
+                setState(() {
+                  _isBottomNavVisible = true;
+                });
+              }
+            }
+            return true;
+          },
+          child: currentScreen,
+        ),
+      ),
+      floatingActionButton: Visibility(
+        visible: _isBottomNavVisible, // Hide FAB when bottom nav is hidden
+        child: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              currentScreen = Staffdashboard();
+              currentTab = 0;
+            });
+          },
+          child: Icon(
+            Icons.home,
+            color: currentTab == 0 ? Color(0xFF007DBB) : Colors.grey,
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: Visibility(
+        visible: _isBottomNavVisible, // Control visibility based on scroll
+        child: BottomAppBar(
+          shape: CircularNotchedRectangle(),
+          notchMargin: 10,
+          child: Container(
+            height: 66,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MaterialButton(
+                      minWidth: 40,
+                      onPressed: () {
+                        setState(() {
+                          currentScreen = Staffleavepage();
+                          currentTab = 1;
+                        });
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.event_note,
+                              color:
+                                  currentTab == 1 ? Colors.blue : Colors.grey),
+                          Text(
+                            "Leave",
+                            style: TextStyle(
+                                color: currentTab == 1
+                                    ? Colors.blue
+                                    : Colors.grey),
+                          )
+                        ],
+                      ),
+                    ),
+                    MaterialButton(
+                      minWidth: 40,
+                      onPressed: () {
+                        setState(() {
+                          currentScreen = Staffattendance();
+                          currentTab = 2;
+                        });
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.fact_check,
+                              color:
+                                  currentTab == 2 ? Colors.blue : Colors.grey),
+                          Text(
+                            "Attendance",
+                            style: TextStyle(
+                                color: currentTab == 2
+                                    ? Colors.blue
+                                    : Colors.grey),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MaterialButton(
+                      minWidth: 40,
+                      onPressed: () {
+                        setState(() {
+                          currentScreen = Payroll();
+                          currentTab = 3;
+                        });
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.account_balance_wallet,
+                              color:
+                                  currentTab == 3 ? Colors.blue : Colors.grey),
+                          Text(
+                            "Payroll",
+                            style: TextStyle(
+                                color: currentTab == 3
+                                    ? Colors.blue
+                                    : Colors.grey),
+                          )
+                        ],
+                      ),
+                    ),
+                    MaterialButton(
+                      minWidth: 40,
+                      onPressed: () {
+                        setState(() {
+                          currentScreen = Profilepage();
+                          currentTab = 4;
+                        });
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.person,
+                              color:
+                                  currentTab == 4 ? Colors.blue : Colors.grey),
+                          Text(
+                            "Profile",
+                            style: TextStyle(
+                                color: currentTab == 4
+                                    ? Colors.blue
+                                    : Colors.grey),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
