@@ -1,0 +1,198 @@
+class UserDataSource extends DataGridSource {
+  List<DataGridRow> _dataGridRows = [];
+  DateFormat formattedDate = DateFormat('dd-MM-yyyy');
+  final Function(String userId) onActionPressed;
+  final Function(String userId) onActionEditPressed;
+  final BuildContext context; // Add BuildContext
+
+  UserDataSource({
+    required List<Datum> users,
+    required this.onActionPressed,
+    required this.onActionEditPressed,
+    required this.context, // Add BuildContext
+  }) {
+    _dataGridRows = users.map<DataGridRow>((user) {
+      return DataGridRow(cells: [
+        DataGridCell<int>(columnName: 'userId', value: user.userId),
+        DataGridCell<String>(
+            columnName: 'name', value: toCamelCase(user.userName)),
+        DataGridCell<String>(
+            columnName: 'mobileNo', value: user.mobile.toString()),
+        DataGridCell<dynamic>(
+            columnName: 'balance',
+            value: "₹ ${user.amount.toStringAsFixed(2)}"),
+        DataGridCell<String>(
+            columnName: 'package', value: toCamelCase(user.packageName)),
+        DataGridCell<String>(
+            columnName: 'joiningDate',
+            value: formattedDate
+                .format(DateTime.parse(user.createdAt.toString()))),
+        DataGridCell<String>(
+            columnName: 'status', value: user.status.toString()),
+        DataGridCell<Widget>(
+            columnName: 'services',
+            value: InkWell(
+                onTap: () {
+                  onActionPressed(user.userId.toString());
+                },
+                child: const Icon(
+                  Icons.info_outline,
+                  color: Colors.black26,
+                ))),
+        DataGridCell<Widget>(
+          columnName: 'actions',
+          value: IconButton(
+            icon: const Icon(
+              Icons.edit,
+              color: Color(0XFF0084A1),
+            ),
+            onPressed: () {
+              showInfoPage(
+                context,
+                user.userId.toString(),
+                user.userName.toString(),
+              ); // function here
+              Memberscreen.selectedUserId = user.userId.toString();
+              onActionEditPressed(user.userId.toString());
+            },
+          ),
+        ),
+      ]);
+    }).toList();
+  }
+
+/// Overlay function for 30% screen
+void showInfoPage(BuildContext context, String userId, String Name) {
+  final overlay = Overlay.of(context);
+  OverlayEntry? overlayEntry;
+
+  overlayEntry = OverlayEntry(
+    builder: (context) => Stack(
+      children: [
+        Positioned(
+          left: 0,
+          top: 0,
+          width: MediaQuery.of(context).size.width * 0.7,
+          height: MediaQuery.of(context).size.height,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 0.5, sigmaY: 0.5),
+            child: Container(
+              color: Colors.black.withOpacity(0.5),
+            ),
+          ),
+        ),
+        Positioned(
+          right: 0,
+          top: 0,
+          width: MediaQuery.of(context).size.width * 0.3,
+          height: MediaQuery.of(context).size.height,
+          child: Material(
+            elevation: 6.0,
+            child: InfoPage(
+              text1: "User ID: $userId",
+              text2: "Name: $Name",
+              onClose: () {
+                overlayEntry?.remove();
+              },
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  overlay.insert(overlayEntry);
+}
+
+Infopage.dart
+
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+import 'package:flutter/material.dart';
+
+
+class InfoPage extends StatefulWidget {
+  final VoidCallback onClose;
+  final String text1;
+  final String text2;
+
+  InfoPage(
+      {Key? key,
+      required this.onClose,
+      required this.text1,
+      required this.text2})
+      : super(key: key);
+
+  @override
+  State<InfoPage> createState() => _InfoPageState();
+}
+
+class _InfoPageState extends State<InfoPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  onPressed: widget.onClose,
+                  icon: Icon(Icons.arrow_back),
+                ),
+                const SizedBox(width: 150),
+                Text(
+                  "User Details",
+                  style: TextStyle(fontSize: 20, color: Colors.black),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: Column(
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.text1,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Text(
+                        widget.text2,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: widget.onClose,
+                          child: Text("Close Now"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[900],
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
