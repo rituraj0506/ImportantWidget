@@ -1,0 +1,298 @@
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+
+import 'package:flutter/material.dart';
+import 'package:money_live_admin/components/minisidedrawer.dart';
+import 'package:money_live_admin/components/navigationbar.dart';
+import 'package:money_live_admin/components/sidedrawer.dart';
+
+class Managequery extends StatefulWidget {
+  const Managequery({super.key});
+
+  @override
+  State<Managequery> createState() => _ManagequeryState();
+}
+
+class _ManagequeryState extends State<Managequery> {
+  bool isDrawerOpen = true;
+  bool isMiniDrawerOpen = false;
+  int selectedIndex = 7;
+  int currentPage = 1;
+  final int itemsPerPage = 10;
+
+  final List<Map<String, String>> rows = List.generate(
+    30,
+    (index) => {
+      'Quote No': '#VX1234',
+      'Date': '12 Aug 2024',
+      'Issue Type': 'Issue ',
+      'Username': 'user$index',
+      'Email': 'user$index@example.com',
+      'Description': 'Lorem ipsum good for..',
+      'Status': index % 3 == 0
+          ? 'Under Process'
+          : (index % 2 == 0 ? 'New' : 'Resolved'),
+    },
+  );
+
+  int get totalPages => (rows.length / itemsPerPage).ceil();
+
+  List<Map<String, String>> get paginatedRows {
+    final startIndex = (currentPage - 1) * itemsPerPage;
+    final endIndex = (startIndex + itemsPerPage) > rows.length
+        ? rows.length
+        : startIndex + itemsPerPage;
+    return rows.sublist(startIndex, endIndex);
+  }
+
+  void toggleDrawer() {
+    setState(() {
+      if (isDrawerOpen) {
+        isDrawerOpen = false;
+        isMiniDrawerOpen = true;
+      } else if (isMiniDrawerOpen) {
+        isDrawerOpen = true;
+        isMiniDrawerOpen = false;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    double contentWidth = screenWidth;
+    if (isDrawerOpen) {
+      contentWidth = screenWidth * 0.82;
+    } else if (isMiniDrawerOpen) {
+      contentWidth = screenWidth * 0.95;
+    }
+
+    return Scaffold(
+      body: Container(
+        width: screenWidth,
+        height: screenHeight,
+        color: Colors.white,
+        child: Row(
+          children: [
+            // if (isDrawerOpen)
+            //   Container(
+            //     width: screenWidth * 0.18,
+            //     height: screenHeight,
+            //     color: Color(0xFF20A1BD),
+            //     child: Sidedrawer(
+            //       selectedIndex: selectedIndex,
+            //     ),
+            //   ),
+            // if (isMiniDrawerOpen)
+            //   Container(
+            //     width: 70,
+            //     height: screenHeight,
+            //     color: Color(0xFF20A1BD),
+            //     child: Minisidedrawer(
+            //       selectedIndex: selectedIndex,
+            //     ),
+            //   ),
+            Container(
+              width: contentWidth,
+              color: Colors.white,
+              child: Column(
+                children: [
+                  // Navigationbar(
+                  //   toggleDrawer: toggleDrawer,
+                  //   NavigationName: 'Manage Queries',
+                  // ),
+                  Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Container(
+                      width: contentWidth,
+                      height: screenHeight * 0.89,
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 1.0, color: Colors.black),
+                        color: Colors.white,
+                      ),
+                      child: Column(
+                        children: [
+                          const Row(
+                            children: [
+                              Text(
+                                'Queries Details',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 13),
+                          Row(
+                            children: [
+                              Text(
+                                "Home > ",
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const Text(
+                                "Manage Queries ",
+                                style: TextStyle(
+                                  color: Colors.orange,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
+                                child: SizedBox(
+                                  width: screenWidth,
+                                  child: DataTable(
+                                    headingRowColor: MaterialStateProperty.all(
+                                        Color(0xFF21209226)),
+                                    columns: [
+                                      const DataColumn(
+                                          label: Text('Queries No')),
+                                      const DataColumn(label: Text('Date')),
+                                      const DataColumn(
+                                          label: Text('Issue Type')),
+                                      const DataColumn(label: Text('Username')),
+                                      const DataColumn(label: Text('Email')),
+                                      const DataColumn(
+                                          label: Text('Description')),
+                                      const DataColumn(label: Text('Status')),
+                                      const DataColumn(label: Text('Action')),
+                                    ],
+                                    rows: paginatedRows
+                                        .map(
+                                          (row) => DataRow(
+                                            cells: [
+                                              DataCell(Text(row['Quote No']!)),
+                                              DataCell(Text(row['Date']!)),
+                                              DataCell(
+                                                  Text(row['Issue Type']!)),
+                                              DataCell(Text(row['Username']!)),
+                                              DataCell(Text(row['Email']!)),
+                                              DataCell(
+                                                  Text(row['Description']!)),
+                                              DataCell(
+                                                Text(
+                                                  row['Status']!,
+                                                  style: TextStyle(
+                                                    color: row['Status'] ==
+                                                            'Under Process'
+                                                        ? Colors.orange
+                                                        : row['Status'] ==
+                                                                'Resolved'
+                                                            ? Colors.green
+                                                            : Colors
+                                                                .grey, // Default to grey for 'New'
+                                                  ),
+                                                ),
+                                              ),
+                                              DataCell(ElevatedButton(
+                                                onPressed: () {
+                                                  // Handle "Start Conversation" action
+                                                },
+                                                child:
+                                                    Text('Start Conversation'),
+                                              )),
+                                            ],
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Pagination Controls
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.chevron_left),
+                                  onPressed: currentPage > 1
+                                      ? () {
+                                          setState(() {
+                                            currentPage--;
+                                          });
+                                        }
+                                      : null,
+                                  color: currentPage > 1
+                                      ? Colors.black
+                                      : Colors.grey,
+                                ),
+                                for (int page = 1; page <= totalPages; page++)
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        currentPage = page;
+                                      });
+                                    },
+                                    child: Container(
+                                      margin:
+                                          EdgeInsets.symmetric(horizontal: 4),
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: currentPage == page
+                                            ? Colors.teal
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(5),
+                                        border: Border.all(
+                                          color: currentPage == page
+                                              ? Colors.teal
+                                              : Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          page.toString(),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: currentPage == page
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                IconButton(
+                                  // ignore: prefer_const_constructors
+                                  icon: Icon(Icons.chevron_right),
+                                  onPressed: currentPage < totalPages
+                                      ? () {
+                                          setState(() {
+                                            currentPage++;
+                                          });
+                                        }
+                                      : null,
+                                  color: currentPage < totalPages
+                                      ? Colors.black
+                                      : Colors.grey,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
