@@ -296,3 +296,418 @@ class _ManagequeryState extends State<Managequery> {
     );
   }
 }
+
+
+
+
+with go to Page Button on right side of pagination
+
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:money_live_admin/Response/AllmangeQueryModel.dart';
+import 'package:money_live_admin/components/loader_icon.dart';
+import 'package:money_live_admin/components/minisidedrawer.dart';
+import 'package:money_live_admin/components/navigationbar.dart';
+import 'package:money_live_admin/components/sidedrawer.dart';
+import 'package:money_live_admin/utils/ApiEndPoint.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+
+class Managequery extends StatefulWidget {
+  const Managequery({super.key});
+
+  @override
+  State<Managequery> createState() => _ManagequeryState();
+}
+
+class _ManagequeryState extends State<Managequery> {
+  bool isDrawerOpen = true;
+  bool isMiniDrawerOpen = false;
+  int selectedIndex = 7;
+  int currentPage = 1;
+  final int itemsPerPage = 5;
+  bool Progressindicator = true;
+
+  final List<Map<String, String>> rows = List.generate(
+    30,
+    (index) => {
+      'Quote No': '#VX1234',
+      'Date': '12 Aug 2024',
+      'Issue Type': 'Issue ',
+      'Username': 'user$index',
+      'Email': 'user$index@example.com',
+      'Description': 'Lorem ipsum good for..',
+      'Status': index % 3 == 0
+          ? 'Under Process'
+          : (index % 2 == 0 ? 'New' : 'Resolved'),
+    },
+  );
+  int get totalPages => (rows.length / itemsPerPage).ceil();
+
+  List<Map<String, String>> get paginatedRows {
+    final startIndex = (currentPage - 1) * itemsPerPage;
+    final endIndex = (startIndex + itemsPerPage) > rows.length
+        ? rows.length
+        : startIndex + itemsPerPage;
+    return rows.sublist(startIndex, endIndex);
+  }
+
+  void toggleDrawer() {
+    setState(() {
+      if (isDrawerOpen) {
+        isDrawerOpen = false;
+        isMiniDrawerOpen = true;
+      } else if (isMiniDrawerOpen) {
+        isDrawerOpen = true;
+        isMiniDrawerOpen = false;
+      }
+    });
+  }
+
+  Future<void> fetchData() async {
+    await Future.delayed(Duration(seconds: 2));
+    setState(() {
+      Progressindicator = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+    // fetchQueryDetails();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    double contentWidth = screenWidth;
+    if (isDrawerOpen) {
+      contentWidth = screenWidth * 0.82;
+    } else if (isMiniDrawerOpen) {
+      contentWidth = screenWidth * 0.95;
+    }
+
+    TextEditingController pageController = TextEditingController();
+
+    return Scaffold(
+      body: Container(
+        width: screenWidth,
+        height: screenHeight,
+        color: Colors.white,
+        child: Row(
+          children: [
+            if (isDrawerOpen)
+              Container(
+                width: screenWidth * 0.18,
+                height: screenHeight,
+                color: Color(0xFF20A1BD),
+                child: Sidedrawer(
+                  selectedIndex: selectedIndex,
+                ),
+              ),
+            if (isMiniDrawerOpen)
+              Container(
+                width: 70,
+                height: screenHeight,
+                color: Color(0xFF20A1BD),
+                child: Minisidedrawer(
+                  selectedIndex: selectedIndex,
+                ),
+              ),
+            Container(
+              width: contentWidth,
+              color: Colors.white,
+              child: Column(
+                children: [
+                  Navigationbar(
+                    toggleDrawer: toggleDrawer,
+                    NavigationName: 'Manage Queries',
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Container(
+                      width: contentWidth,
+                      height: screenHeight * 0.89,
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 1.0, color: Colors.black),
+                        color: Colors.white,
+                      ),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: const Row(
+                              children: [
+                                Text(
+                                  'Queries Details',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 13),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Row(
+                              children: [
+                                Text(
+                                  "Home > ",
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                const Text(
+                                  "Manage Queries ",
+                                  style: TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Divider(),
+                          if (Progressindicator)
+                            Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(height: 100),
+                                  LoaderIcon(),
+                                ],
+                              ),
+                            )
+                          else
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.vertical,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                            color: Colors.grey, width: 1.0),
+                                      ),
+                                    ),
+                                    width: screenWidth,
+                                    child: DataTable(
+                                      headingRowColor:
+                                          MaterialStateProperty.all(
+                                              Color(0xFF21209226)),
+                                      columns: [
+                                        const DataColumn(
+                                            label: Text('Queries No')),
+                                        const DataColumn(label: Text('Date')),
+                                        const DataColumn(
+                                            label: Text('Issue Type')),
+                                        const DataColumn(
+                                            label: Text('Username')),
+                                        const DataColumn(label: Text('Email')),
+                                        const DataColumn(
+                                            label: Text('Description')),
+                                        const DataColumn(label: Text('Status')),
+                                        const DataColumn(label: Text('Action')),
+                                      ],
+                                      rows: paginatedRows
+                                          .map(
+                                            (row) => DataRow(
+                                              cells: [
+                                                DataCell(
+                                                    Text(row['Quote No']!)),
+                                                DataCell(Text(row['Date']!)),
+                                                DataCell(
+                                                    Text(row['Issue Type']!)),
+                                                DataCell(
+                                                    Text(row['Username']!)),
+                                                DataCell(Text(row['Email']!)),
+                                                DataCell(
+                                                    Text(row['Description']!)),
+                                                DataCell(
+                                                  Text(
+                                                    row['Status']!,
+                                                    style: TextStyle(
+                                                      color: row['Status'] ==
+                                                              'Under Process'
+                                                          ? Colors.orange
+                                                          : row['Status'] ==
+                                                                  'Resolved'
+                                                              ? Colors.green
+                                                              : Colors
+                                                                  .red, // Default to grey for 'New'
+                                                    ),
+                                                  ),
+                                                ),
+                                                DataCell(ElevatedButton(
+                                                  onPressed: () {},
+                                                  child: Text('Start Process'),
+                                                )),
+                                              ],
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          // Pagination Controls
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(right: 10, bottom: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.chevron_left),
+                                  onPressed: currentPage > 1
+                                      ? () {
+                                          setState(() {
+                                            currentPage--;
+                                          });
+                                        }
+                                      : null,
+                                  color: currentPage > 1
+                                      ? Colors.black
+                                      : Colors.grey,
+                                ),
+                                for (int page = 1; page <= totalPages; page++)
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        currentPage = page;
+                                      });
+                                    },
+                                    child: Container(
+                                      margin:
+                                          EdgeInsets.symmetric(horizontal: 4),
+                                      width: 30,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                        color: currentPage == page
+                                            ? Colors.teal
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(5),
+                                        border: Border.all(
+                                          color: currentPage == page
+                                              ? Colors.teal
+                                              : Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          page.toString(),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: currentPage == page
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                IconButton(
+                                  icon: Icon(Icons.chevron_right),
+                                  onPressed: currentPage < totalPages
+                                      ? () {
+                                          setState(() {
+                                            currentPage++;
+                                          });
+                                        }
+                                      : null,
+                                  color: currentPage < totalPages
+                                      ? Colors.black
+                                      : Colors.grey,
+                                ),
+                                Text("Go To Page"),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                // Go to Page input and button
+                                Container(
+                                  width:
+                                      120, // You can adjust the width based on your design
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        height: 40,
+                                        width:
+                                            40, // You can adjust this size as well
+                                        child: TextField(
+                                          controller: pageController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: InputDecoration(
+                                            hintText: '',
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    vertical: 2),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Flexible(
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            int? page = int.tryParse(
+                                                pageController.text);
+                                            if (page != null &&
+                                                page > 0 &&
+                                                page <= totalPages) {
+                                              setState(() {
+                                                currentPage = page;
+                                              });
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        'Invalid page number')),
+                                              );
+                                            }
+                                          },
+                                          child: Text('Go'),
+                                          style: ElevatedButton.styleFrom(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 8),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
