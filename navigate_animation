@@ -1,0 +1,94 @@
+import 'package:document_verification/SplashScreen.dart';
+import 'package:document_verification/components/MemberEdit1.dart';
+import 'package:document_verification/screens/AdminBankModule.dart';
+import 'package:document_verification/screens/AdminDashboard.dart';
+import 'package:document_verification/screens/AdminPackageList.dart';
+import 'package:document_verification/screens/AdminReportScreen.dart';
+import 'package:document_verification/screens/CreateMemberScreen.dart';
+import 'package:document_verification/screens/LoginScreen.dart';
+import 'package:document_verification/screens/MemberEditDrawer.dart';
+import 'package:document_verification/screens/MemberScreen.dart';
+import 'package:document_verification/screens/RegisterScreen.dart';
+import 'package:document_verification/screens/UserDashboard.dart';
+import 'package:document_verification/screens/UserScreen/api_verification_page.dart';
+import 'package:document_verification/screens/UserScreen/developer_zone_main_page.dart';
+import 'package:document_verification/screens/UserScreen/fund_request_page.dart';
+import 'package:document_verification/screens/UserScreen/user_report_page.dart';
+import 'package:document_verification/screens/admin_payment_page.dart';
+import 'package:document_verification/screens/api_switching_page.dart';
+import 'package:document_verification/screens/create_new_package_screen.dart';
+import 'package:flutter/material.dart';
+
+
+void main() {
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    initialRoute: 'splash',
+    onGenerateRoute: (RouteSettings settings) {
+      WidgetBuilder builder;
+      switch (settings.name) {
+        case 'splash':
+          builder = (context) => const Splashscreen();
+          break;
+        case 'login':
+          builder = (context) => const LoginScreen();
+          break;
+        case 'register':
+          builder = (context) => const Registerscreen();
+          break;
+        case 'adminDashboard':
+          builder = (context) => const Admindashboard();
+          break;
+        case 'userDashboard':
+          builder = (context) => const Userdashboard();
+          break;
+        case 'memberPage':
+          builder = (context) => const Memberscreen();
+          break;
+        case 'adminBankModule':
+          builder = (context) => const Adminbankmodule();
+          break;
+        case 'adminReportScreen':
+          builder = (context) => const Adminreportscreen();
+          break;
+        case 'adminPaymentPage':
+          builder = (context) => const AdminPaymentPage();
+          break;
+        case 'userReportPage':
+          builder = (context) => const UserReportPage();
+          break;
+        case 'apiVerificationPage':
+          builder = (context) => const ApiVerificationPage();
+          break;
+        case 'api_switching':
+          builder = (context) => const ApiSwitchingPage();
+          break;
+        case 'adminPackagePage':
+          builder = (context) => const Adminpackagelist();
+          break;
+        case 'createNewPackage':
+          builder = (context) => const CreateNewPackageScreen();
+          break;
+        case 'fundRequestPage':
+          builder = (context) => const FundRequestPage();
+          break;
+        case 'developerZone':
+          builder = (context) => const DeveloperZoneMainPage();
+          break;
+        default:
+          throw Exception('Invalid route: ${settings.name}');
+      }
+      return PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            builder(context),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return child; 
+        },
+        transitionDuration: Duration.zero, // No transition time
+        reverseTransitionDuration: Duration.zero, // No reverse transition time
+      );
+    },
+  ));
+}
+
+
