@@ -1,0 +1,169 @@
+ApiEndPoint.dart
+
+class ApiEndPoints {
+  // static const String baseUrl="http://103.101.59.145/";
+  static const String baseUrl = "https://attnx.ai/";
+  static _AuthEndPoints authEndPoint = _AuthEndPoints();
+}
+
+class _AuthEndPoints {
+  final String loginEmail = 'api/auth/login';
+  final String signUp = 'createUser';
+  final String registerUser = 'api/auth/register';
+   final String changePassword = 'api/auth/change-password';
+   final String fetchCompanyList = 'api/company';
+}
+
+
+// Get
+
+  Future<void> fetchCompanyList(int pageNumber, String search) async {
+    setState(() {
+      isLoading = true; // Set loading state to true
+    });
+    try {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      var token = preferences.getString("token") ?? "";
+
+      String apiUrl =
+          '${ApiEndPoints.baseUrl}${ApiEndPoints.authEndPoint.fetchCompanyList}?page=$pageNumber&limit=7&sortOrder=desc&search=$search';
+      final Map<String, String> headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token'
+      };
+      final response = await http.get(Uri.parse(apiUrl), headers: headers);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> companies = data['companies'];
+        companyList.clear();
+        companyList = companies.map((json) => Company.fromJson(json)).toList();
+        totalPageNumber = data['totalPages'];
+      } else {
+        print("Error: ${response.statusCode}");
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Exception: $e");
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }      //  DataCell(
+            Text(companyList[index].name, style: const TextStyle(color: Color(0XFF797D8C)),)),
+
+
+
+// POST
+
+ Future<void> _validateAndSubmit(String name, String designation, String address, String mobile, String secondaryMobile, String email, String joiningDate,
+      String fatherName, String fatherContact, String fatherOccupation, String motherName, String motherContact, String motherOccupation, String aadharNumber,
+      String panCard, String bankName, String accountNumber, String ifscNumber,String selectedStatus, String selectedRole, String selectedBankType,String bond,
+      String _securityAmount, String branchName) async {
+
+    setState(() {
+      isLoading = true; // Start loader
+    });
+
+    SharedPreferences preferences=await SharedPreferences.getInstance();
+    final token=preferences.getString("token");
+
+    String apiUrl='${ApiEndPoints.baseUrl}${ApiEndPoints.authEndPoint.registerUser}';
+
+
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token'
+    };
+
+    Map<String, dynamic> data = {
+      "name": name,
+      "email": email,
+      "role": selectedRole,
+      "designation":designation,
+      "personalDetails": {
+        "mobileNumber": mobile,
+        "secondaryMobileNumber": secondaryMobile,
+        "emailId": email,
+        "address": address,
+        "joiningDate": joiningDate,
+       // "profilePhoto": "http://example.com/photo.jpg",
+       // "profilePhoto": _profilePhotoBase64,
+        "profilePhoto": _profilePhotoBase64,
+        "bondYear": bond,
+        "securityAmount": _securityAmount,
+        "status": selectedStatus
+      },
+      "familyDetails": {
+        "fatherName": fatherName,
+        "fatherOccupation": fatherOccupation,
+        "fatherContactNumber": fatherContact,
+        "motherName": motherName,
+        "motherOccupation": motherOccupation,
+        "motherContactNumber": motherContact,
+        "children": _childFields
+            .map((child) => {
+          "name": child['name']!.text,
+          "age": int.tryParse(child['age']!.text) ?? 0,
+        }).toList(),
+      },
+      "documentDetails": {
+        "aadharNumber": aadharNumber,
+        //"aadharCardFront": "http://example.com/aadhar_front.jpg",
+        //"aadharCardBack": "http://example.com/aadhar_back.jpg",
+        // "aadharCardFront": _aadharFrontBase64,
+        "aadharCardFrontPhoto": _aadharFrontBase64,
+        // "aadharCardBack": _aadharBackBase64,
+        "aadharCardBackPhoto": _aadharBackBase64,
+
+
+        "panNumber": panCard,
+        // "panCard": _panCardBase64,
+        "panCardPhoto": _panCardBase64,
+        //"panCard": "http://example.com/pan.jpg",
+        "insurances": _insuranceFields
+            .map((insurance) => {
+          "insuranceCompany": insurance['company']!.text,
+          "insuranceNumber": insurance['number']!.text,
+         // "insuranceDocument": "http://example.com/insurance.pdf", // Example placeholder
+          "insuranceDocument": _insurancePhotoBase64,
+        }).toList(),
+      },
+      "bankDetails": {
+        "bankName": bankName,
+        "accountNumber": accountNumber,
+        "bankType": selectedBankType,
+        "IFSC": ifscNumber,
+        "branchName":branchName
+      }
+    };
+
+    String jsonBody = json.encode(data);
+    print(jsonBody);
+    final response = await http.post(Uri.parse(apiUrl), headers: headers, body: jsonBody);
+
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
+    print(responseData);
+
+    if (response.statusCode == 201) {
+      Navigator.pushReplacementNamed(context, 'hrUserListPage');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(responseData['message'])),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(responseData['message'])),
+      );
+    }
+    setState(() {
+      isLoading = false; // Stop loader
+    });
+  }
+}
+
+
+
