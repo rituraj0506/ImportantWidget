@@ -166,4 +166,76 @@ class _AuthEndPoints {
 }
 
 
+// If We Need To Pass Any Parameter in Api 
+
+
+
+class _ShowPlanScreenState extends State<ShowPlanScreen> {
+  int selectedIndex = 0;
+  final int stateId = 5;
+  final int providerId;
+
+  Map<String, List<dynamic>> plans = {
+    "topup": [],
+    "full_talktime": [],
+    "internet_3g": [],
+    "rate_cutter": [],
+    "sms": [],
+    "combo": [],
+  };
+
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPlans();
+  }
+
+  Future<void> fetchPlans() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      const apiUrl = "https://accounts.credbill.com/api/plan/v1/prepaid-plan";
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({
+          "api_token": token,
+          "provider_id": widget.providerId,
+          "state_id": stateId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          plans["topup"] = data["topup"] ?? [];
+          plans["full_talktime"] = data["full_talktime"] ?? [];
+          plans["internet_3g"] = data["internet_3g"] ?? [];
+          plans["rate_cutter"] = data["rate_cutter"] ?? [];
+          plans["sms"] = data["sms"] ?? [];
+          plans["combo"] = data["combo"] ?? [];
+          isLoading = false;
+        });
+      } else {
+        print('Error: ${response.statusCode}');
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Exception: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
 
