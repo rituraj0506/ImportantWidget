@@ -1,0 +1,78 @@
+import 'package:flutter/material.dart';
+
+class Helpandsupport extends StatefulWidget {
+  const Helpandsupport({super.key});
+
+  @override
+  State<Helpandsupport> createState() => _HelpandsupportState();
+}
+
+class _HelpandsupportState extends State<Helpandsupport> {
+  @override
+
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        // backgroundColor: const Color(0xFF4542AF),
+        backgroundColor:  Colors.black87,
+        body: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  // color: Color(0XFF2F2B7E),
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                padding: const EdgeInsets.all(4),
+                margin: EdgeInsets.symmetric(horizontal: 60, vertical: 10),
+                child: Container(
+                  child: TabBar(
+                    labelPadding: EdgeInsets.symmetric(vertical: 0),
+                    dividerColor: Colors.transparent,
+                    indicator: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                    ),
+                    indicatorColor: Colors.transparent,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: Colors.black,
+                    unselectedLabelColor: Colors.white,
+                    tabs: [
+                      Tab(child: Text("Pendiing Issue")),
+                      Tab(child: Text("Resolved Issue")),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    PendingIssue(),
+                    ResolvedIssue(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget PendingIssue(){
+    return Center(child: Text("Pending Issue",style: TextStyle(color: Colors.white,fontSize: 20),),);
+   // here you can call differnt screen like return homepage();
+  }
+
+  Widget ResolvedIssue(){
+    return Center(child: Text("Resolved Issue",style: TextStyle(color: Colors.white,fontSize: 20),),);
+  // here you can call differnt screen like return profilepage();
+  }
+
+
+}
