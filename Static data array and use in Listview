@@ -1,0 +1,43 @@
+In UI i direct use static data in that case 
+
+
+final List<Map<String, dynamic>> assignments = [
+  {
+    'startDate': '15 Mar',
+    'endDate': '29 Mar 24',
+    'subject': 'Physics',
+    'type': 'Half Yearly Test',
+    'teacher': 'Marah Petersen',
+    'teacherImage': 'assets/teacher1.png',
+  },
+  {
+    'startDate': '25 May',
+    'endDate': '29 May 24',
+    'subject': 'Hindi',
+    'type': 'Class Test',
+    'teacher': 'Jenifer Clark',
+    'teacherImage': 'assets/teacher2.png',
+  },
+];
+
+ListView.builder(
+  itemCount: assignments.length,
+  itemBuilder: (context, index) {
+    final item = assignments[index];
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(item['startDate'], style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(item['subject’],))
+
+           ])])
+
+
+
+
