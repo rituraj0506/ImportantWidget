@@ -1,0 +1,151 @@
+Json to dart using null safety 
+
+
+class Company {
+  final String name;
+  final String location;
+
+  Company({required this.name, required this.location});
+
+  factory Company.fromJson(Map<String, dynamic> json) {
+    return Company(
+      name: json['name'] ?? '',
+      location: json['location'] ?? '',
+    );
+  }
+}
+
+
+
+
+If this is the JSON:
+json
+
+{
+  "companies": [
+    { "name": "Apple", "location": "USA" },
+    { "name": "Google", "location": "USA" }
+  ],
+  "totalPages": 2
+}
+
+Then:
+final List<dynamic> companies = data['companies'];
+
+
+Becomes:
+
+List<Map<String, dynamic>> companies = [
+  { 'name': 'Apple', 'location': 'USA' },
+  { 'name': 'Google', 'location': 'USA' },
+];
+
+And then this:
+companyList = companies.map((json) => Company.fromJson(json)).toList();
+
+
+Becomes:
+
+
+List<Company> companyList = [
+  Company(name: 'Apple', location: 'USA'),
+  Company(name: 'Google', location: 'USA'),
+];
+
+
+
+List<Company> companyList;
+
+
+
+Future<void> fetchCompanyList(int pageNumber, String search) async {
+    setState(() {
+      isLoading = true; // Set loading state to true
+    });
+    try {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      var token = preferences.getString("token") ?? "";
+
+      String apiUrl =
+          '${ApiEndPoints.baseUrl}${ApiEndPoints.authEndPoint.fetchCompanyList}?page=$pageNumber&limit=7&sortOrder=desc&search=$search';
+      final Map<String, String> headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token'
+      };
+
+      final response = await http.get(Uri.parse(apiUrl), headers: headers);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> companies = data['companies'];
+        companyList.clear();
+        companyList = companies.map((json) => Company.fromJson(json)).toList();
+        totalPageNumber = data['totalPages'];
+      } else {
+        print("Error: ${response.statusCode}");
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Exception: $e");
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+
+     Text(companyList[index].name, style: const TextStyle(color: Color(0XFF797D8C)),)),
+
+
+
+instead of  map we can  use loop 
+
+
+Future<void> fetchCompanyList(int pageNumber, String search) async {
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    var token = preferences.getString("token") ?? "";
+
+    String apiUrl =
+        '${ApiEndPoints.baseUrl}${ApiEndPoints.authEndPoint.fetchCompanyList}?page=$pageNumber&limit=7&sortOrder=desc&search=$search';
+
+    final Map<String, String> headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    final response = await http.get(Uri.parse(apiUrl), headers: headers);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final List<dynamic> companies = data['companies'];
+
+      companyList.clear();
+      for (var json in companies) {
+        companyList.add(Company.fromJson(json));
+      }
+
+      totalPageNumber = data['totalPages'];
+    } else {
+      print("Error: ${response.statusCode}");
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print("Exception: $e");
+    }
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
+  }
+}
+
+
