@@ -1,0 +1,115 @@
+In case of Multiple array data  Inside api response  then we crate sepearte list and use it 
+
+{
+  "assignments": [
+    {
+      "startDate": "15 Mar",
+      "endDate": "29 Mar 24",
+      "subject": "Physics",
+      "type": "Half Yearly Test",
+      "teacher": "Marah Petersen",
+      "teacherImage": "assets/teacher1.png"
+    },
+    {
+      "startDate": "25 May",
+      "endDate": "29 May 24",
+      "subject": "Hindi",
+      "type": "Class Test",
+      "teacher": "Jenifer Clark",
+      "teacherImage": "assets/teacher2.png"
+    }
+  ],
+  "teachers": [
+    { "name": "Marah Petersen", "id": 1 },
+    { "name": "Jenifer Clark", "id": 2 }
+  ]
+}
+
+json to dart using null safety
+
+class Assignment {
+  final String startDate;
+  final String endDate;
+  final String subject;
+  final String type;
+  final String teacher;
+  final String teacherImage;
+
+  Assignment({
+    required this.startDate,
+    required this.endDate,
+    required this.subject,
+    required this.type,
+    required this.teacher,
+    required this.teacherImage,
+  });
+
+  factory Assignment.fromJson(Map<String, dynamic> json) {
+    return Assignment(
+      startDate: json['startDate'],
+      endDate: json['endDate'],
+      subject: json['subject'],
+      type: json['type'],
+      teacher: json['teacher'],
+      teacherImage: json['teacherImage'],
+    );
+  }
+}
+
+class Teacher {
+  final String name;
+  final int id;
+
+  Teacher({required this.name, required this.id});
+
+  factory Teacher.fromJson(Map<String, dynamic> json) {
+    return Teacher(
+      name: json['name'],
+      id: json['id'],
+    );
+  }
+}
+
+List<Assignment> assignmentList = [];
+List<Teacher> teacherList = [];
+
+Future<void> fetchAssignmentsData() async {
+  try {
+    final response = await http.get(Uri.parse("https://your-api-url.com/data"));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+
+      // 🟢 1. Decode assignments
+      final List<dynamic> assignmentsJson = data['assignments'];
+      assignmentList = assignmentsJson
+          .map((json) => Assignment.fromJson(json))
+          .toList();
+
+      // 🟢 2. Decode teachers
+      final List<dynamic> teachersJson = data['teachers'];
+      teacherList = teachersJson
+          .map((json) => Teacher.fromJson(json))
+          .toList();
+
+      print("Assignments: ${assignmentList.length}, Teachers: ${teacherList.length}");
+    } else {
+      print("Error: ${response.statusCode}");
+    }
+  } catch (e) {
+    print("Exception: $e");
+  }
+}
+
+
+
+ListView.builder(
+  itemCount: assignmentList.length,
+  itemBuilder: (context, index) {
+    final item = assignmentList[index];
+    return ListTile(
+      title: Text(item.subject),
+      subtitle: Text("Teacher: ${item.teacher}"),
+    );
+  },
+);
