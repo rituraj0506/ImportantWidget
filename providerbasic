@@ -1,0 +1,124 @@
+countermodel.dart 
+
+import 'package:flutter/material.dart';
+
+class CounterModel extends  ChangeNotifier{
+  int count =0;
+  // int get count => _count; // if val is private like _count then we use geeter so in other file value is not modified
+  void increment(){
+    count++;
+    notifyListeners();
+  }
+}
+
+
+// use of Provider.of rebuild whole ui
+
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shoesapp/counter_model.dart';
+
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  int _counter = 0;
+
+  void _incrementcounter(){
+    setState(() {
+      _counter++;
+    });
+  }
+
+
+
+  Widget build(BuildContext context) {
+
+    final providerUser = Provider.of<CounterModel>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            Text("You Pushed the button this many times"),
+            // Text('$_counter'),
+            Text('${providerUser.count}'),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        // onPressed: _incrementcounter,
+        onPressed: providerUser.increment,
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+
+
+// use of Consumer Sirf Consumer ka andar ka widget rebuild hota hai,  Performance ke liye zyada better hota hai
+
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  int _counter = 0;
+
+  void _incrementcounter(){
+    setState(() {
+      _counter++;
+    });
+  }
+
+  // 
+
+
+  Widget build(BuildContext context) {
+
+    // final providerUser = Provider.of<CounterModel>(context);
+
+    return Consumer<CounterModel>(builder: (context,value,child)=>Scaffold(
+      appBar: AppBar(
+
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            Text("You Pushed the button this many times"),
+            // Text('$_counter'),
+            // Text(value.count.toString()),
+            // watch use kr skte hai hm value dikhane k liye
+            Text('${context.watch<CounterModel>().count}'),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        // onPressed: _incrementcounter,
+        onPressed: (){
+          // read use krte hai hm match ko cll krne k liye
+          final counter = context.read<CounterModel>();
+          counter.increment();
+        },
+        child: Icon(Icons.add),
+      ),
+    ));
+  }
+}
+
