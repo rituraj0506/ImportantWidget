@@ -1,0 +1,137 @@
+🔢 Case	                            Data Sent Through	✅       json.encode Required?	     🧾 Content-Type
+API 1:  forgotPassword	            URL Query Param (?email=)	      ❌	                        Not required
+API 2:  _validateAndSubmit	        Request Body (JSON)         	  ✅	                        application/json
+
+
+
+Future<void> forgotPassword(String email) async {
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    var token = preferences.getString("token") ?? "";
+    String encodedEmail = Uri.encodeComponent(email);
+
+    String apiUrl = "${Apiendpoint.baseUrl}/login/getOtp?email=$encodedEmail";
+
+    final Map<String, String> headers = {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    final response = await http.post(Uri.parse(apiUrl), headers: headers);
+
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      final token = responseData['token'];
+      if (token != null) {
+        await preferences.setString("token", token);
+      }
+
+      Navigator.pushReplacementNamed(context, 'VerifyOtp');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(responseData['message'] ?? "Success")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(responseData['message'] ?? "Something went wrong")),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("An error occurred. Please try again.")),
+    );
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
+  }
+}
+
+
+Future<void> _validateAndSubmit(
+  String name,
+  String designation,
+  String address,
+  String mobile,
+  String secondaryMobile,
+  String email,
+  String joiningDate,
+  String fatherName,
+  String fatherContact,
+  String fatherOccupation,
+  String motherName,
+  String motherContact,
+  String motherOccupation,
+) async {
+  setState(() {
+    isLoading = true;
+  });
+
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  final token = preferences.getString("token");
+
+  String apiUrl = '${ApiEndPoints.baseUrl}${ApiEndPoints.authEndPoint.registerUser}';
+
+  final Map<String, String> headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
+
+  Map<String, dynamic> data = {
+    "name": name,
+    "email": email,
+    "role": selectedRole,
+    "designation": designation,
+    "personalDetails": {
+      "mobileNumber": mobile,
+      "secondaryMobileNumber": secondaryMobile,
+      "emailId": email,
+      "address": address,
+      "joiningDate": joiningDate,
+      "profilePhoto": _profilePhotoBase64,
+      "bondYear": bond,
+      "securityAmount": _securityAmount,
+      "status": selectedStatus,
+    },
+    "familyDetails": {
+      "fatherName": fatherName,
+      "fatherOccupation": fatherOccupation,
+      "fatherContactNumber": fatherContact,
+      "motherName": motherName,
+      "motherOccupation": motherOccupation,
+      "motherContactNumber": motherContact,
+      "children": _childFields
+          .map((child) => {
+                "name": child['name']!.text,
+                "age": int.tryParse(child['age']!.text) ?? 0,
+              })
+          .toList(),
+    },
+  };
+
+  String jsonBody = json.encode(data); // 👈 This is important
+
+  final response = await http.post(Uri.parse(apiUrl), headers: headers, body: jsonBody);
+
+  final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+  if (response.statusCode == 201) {
+    Navigator.pushReplacementNamed(context, 'hrUserListPage');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(responseData['message'])),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(responseData['message'])),
+    );
+  }
+
+  setState(() {
+    isLoading = false;
+  });
+}
